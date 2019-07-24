@@ -44,7 +44,7 @@ void dataproc(uchar *buffer, long length, int frames, int height, int width, str
     VideoWriter writer_bit;
     int codec = VideoWriter::fourcc('M', 'J', 'P', 'G');
 
-    double fps = 50.0;                          // framerate of the created video stream
+    double fps = 30.0;                          // framerate of the created video stream
     string video_filename(videoname);
 //    string video_filename = "./slow_show.avi";             // name of the output video file
     string video_filename_bit = "./slow_show_bit.avi";     // name of the output video file
@@ -225,7 +225,10 @@ int main(int argc, char *argv[])
 
     imgproc procbuffer;
     procbuffer.openvideo(videoname);
-    dataproc(procbuffer, buffer, length, length *8 /(HEIGHT*WIDTH), HEIGHT,WIDTH, videoname);
+
+  dataproc(procbuffer, buffer, length, length *8 /(HEIGHT*WIDTH), HEIGHT,WIDTH, videoname);
+
+
 
     delete [] buffer;
 
@@ -237,11 +240,12 @@ void dataproc(class imgproc &procbuffer, uchar *buffer, long length, int frames,
     {
         procbuffer.get_raw(buffer+i*height*width/8);
         procbuffer.proc_raw();
+        procbuffer.savevideo();
+        procbuffer.saveimg();
 
         //    imshow("LLLL", procbuffer.out_buf.front());
         //waitKey(0);
     }
-
 }
 void imgproc::proc_raw()
 {
@@ -254,159 +258,93 @@ void imgproc::proc_raw()
     uint itime = 0;
     uchar *pulse = in_buf;
 
-    deque<Mat>::size_type sz = out_buf.size();
     
-    cout << "Hello from proc_raw function" << endl;
-    for (irow = 10; irow < 240; irow++)
-            {
-                for (itime = 10; itime < 40; itime++)//每行52个字节
-                {
+//    cout << "Hello from proc_raw function" << endl;
 
-                    if (pulse[irow * 50 + itime] & q1)
+    Mat img_buffer(Size(WIDTH, HEIGHT), CV_8UC1);
+    
+    memset(img_buffer.data,0x00,WIDTH*HEIGHT);
+
+    uchar *dbuffer = img_buffer.data;
+    
+    for (irow = 0; irow < 250; irow++)
+    {
+
+        for (itime = 0; itime < 50; itime++)//每行52个字节
+        {
+                    if (pulse[ irow * 50 + itime] & q1)
                     {
-                        for (int ii = 0; ii< sz; ii++) {
-                            uchar *data = out_buf[ii].data;
-                            data[8*50*irow+8*itime] += ii*2;
-                            for (int jj = ii; jj < sz;  jj++)
-                                for (int kk = ii; kk < sz; kk++) {
-                                    data[8*50*irow+8*itime + jj+kk] += ii;
-                                    data[8*50*irow+8*itime + jj-kk] += ii;
-                                    data[8*50*irow+8*itime - jj+kk] += ii;
-                                    data[8*50*irow+8*itime - jj-kk] += ii;
-                                }
-                        }
-//                      dbuffer[8 * 50 * irow + 8 * itime]++;
+                        dbuffer[8 * 50 * irow + 8 * itime]++;
                     }
                     if (pulse[ irow * 50 + itime] & q2)
                     {
-                        for (int ii = 0; ii< sz; ii++) {
-                            uchar *data = out_buf[ii].data;
-                            data[8*50*irow+8*itime+1] += ii*2;
-                            for (int jj = ii; jj < sz;  jj++)
-                                for (int kk = ii; kk < sz; kk++) {
-                                    data[8*50*irow+8*itime + jj+kk+1] += ii;
-                                    data[8*50*irow+8*itime + jj-kk+1] += ii;
-                                    data[8*50*irow+8*itime - jj+kk+1] += ii;
-                                    data[8*50*irow+8*itime - jj-kk+1] += ii;
-                                }
-                        }
-//                      dbuffer[8 * 50 * irow + 8 * itime + 1]++;
+                        dbuffer[8 * 50 * irow + 8 * itime + 1]++;
                     }
                     if (pulse[ irow * 50 + itime] & q3)
                     {
-                        for (int ii = 0; ii< sz; ii++) {
-                            uchar *data = out_buf[ii].data;
-                            data[8*50*irow+8*itime+2] += ii*2;
-                            for (int jj = ii; jj < sz;  jj++)
-                                for (int kk = ii; kk < sz; kk++) {
-                                    data[8*50*irow+8*itime + jj+kk+2] += ii;
-                                    data[8*50*irow+8*itime + jj-kk+2] += ii;
-                                    data[8*50*irow+8*itime - jj+kk+2] += ii;
-                                    data[8*50*irow+8*itime - jj-kk+2] += ii;
-                                }
-                        }
-//                      dbuffer[8 * 50 * irow + 8 * itime + 2]++;
+                        dbuffer[8 * 50 * irow + 8 * itime + 2]++;
                     }
                     if (pulse[ irow * 50 + itime] & q4)
                     {
-                        for (int ii = 0; ii< sz; ii++) {
-                            uchar *data = out_buf[ii].data;
-                            data[8*50*irow+8*itime+3] += ii*2;
-                            for (int jj = ii; jj < sz;  jj++)
-                                for (int kk = ii; kk < sz; kk++) {
-                                    data[8*50*irow+8*itime + jj+kk+3] += ii;
-                                    data[8*50*irow+8*itime + jj-kk+3] += ii;
-                                    data[8*50*irow+8*itime - jj+kk+3] += ii;
-                                    data[8*50*irow+8*itime - jj-kk+3] += ii;
-                                }
-                        }
-//                      dbuffer[8 * 50 * irow + 8 * itime + 3]++;
+                        dbuffer[8 * 50 * irow + 8 * itime + 3]++;
                     }
                     if (pulse[ irow * 50 + itime] & q5)
                     {
-                        for (int ii = 0; ii< sz; ii++) {
-                            uchar *data = out_buf[ii].data;
-                            data[8*50*irow+8*itime+4] += ii*2;
-                            for (int jj = ii; jj < sz;  jj++)
-                                for (int kk = ii; kk < sz; kk++) {
-                                    data[8*50*irow+8*itime + jj+kk+4] += ii;
-                                    data[8*50*irow+8*itime + jj-kk+4] += ii;
-                                    data[8*50*irow+8*itime - jj+kk+4] += ii;
-                                    data[8*50*irow+8*itime - jj-kk+4] += ii;
-                                }
-                        }
-//                      dbuffer[8 * 50 * irow + 8 * itime + 4]++;
+                        dbuffer[8 * 50 * irow + 8 * itime + 4]++;
                     }
                     if (pulse[ irow * 50 + itime] & q6)
                     {
-                        for (int ii = 0; ii< sz; ii++) {
-                            uchar *data = out_buf[ii].data;
-                            data[8*50*irow+8*itime+5] += ii*2;
-                            for (int jj = ii; jj < sz;  jj++)
-                                for (int kk = ii; kk < sz; kk++) {
-                                    data[8*50*irow+8*itime + jj+kk+5] += ii;
-                                    data[8*50*irow+8*itime + jj-kk+5] += ii;
-                                    data[8*50*irow+8*itime - jj+kk+5] += ii;
-                                    data[8*50*irow+8*itime - jj-kk+5] += ii;
-                                }
-                        }
-//                      dbuffer[8 * 50 * irow + 8 * itime + 5]++;
+                        dbuffer[8 * 50 * irow + 8 * itime + 5]++;
                     }
                     if (pulse[ irow * 50 + itime] & q7)
                     {
-                        for (int ii = 0; ii< sz; ii++) {
-                            uchar *data = out_buf[ii].data;
-                            data[8*50*irow+8*itime+6] += ii*2;
-                            for (int jj = ii; jj < sz;  jj++)
-                                for (int kk = ii; kk < sz; kk++) {
-                                    data[8*50*irow+8*itime + jj+kk+6] += ii;
-                                    data[8*50*irow+8*itime + jj-kk+6] += ii;
-                                    data[8*50*irow+8*itime - jj+kk+6] += ii;
-                                    data[8*50*irow+8*itime - jj-kk+6] += ii;
-                                }
-                        }
-//                      dbuffer[8 * 50 * irow + 8 * itime + 6]++;
+                        dbuffer[8 * 50 * irow + 8 * itime + 6]++;
                     }
                     if (pulse[ irow * 50 + itime] & q8)
                     {
-                        for (int ii = 0; ii< sz; ii++) {
-                            uchar *data = out_buf[ii].data;
-                            data[8*50*irow+8*itime+7] += ii*2;
-                            for (int jj = ii; jj < sz;  jj++)
-                                for (int kk = ii; kk < sz; kk++) {
-                                    data[8*50*irow+8*itime + jj+kk+7] += ii;
-                                    data[8*50*irow+8*itime + jj-kk+7] += ii;
-                                    data[8*50*irow+8*itime - jj+kk+7] += ii;
-                                    data[8*50*irow+8*itime - jj-kk+7] += ii;
-                                }
-                        }
-//                      dbuffer[8 * 50 * irow + 8 * itime + 7]++;
+                        dbuffer[8 * 50 * irow + 8 * itime + 7]++;
                     }
-                }
-            }
+        }
+    }
+    goodimg = goodimg +  img_buffer;
+    out_buf.push_back(img_buffer);
+    if (out_buf.size()> out_buf_limits)
+    {
+        goodimg = goodimg - out_buf.front();
+        out_buf.pop_front();
+    }
+
+    // cout << out_buf.size() << endl;
+
+    
 }
 void imgproc::get_raw(uchar *in)
 {
     memcpy(in_buf, in, in_buffer_size);
-    cout << "Copy Success" << endl;
-    Mat  img(Size(WIDTH,HEIGHT), CV_8UC1);
-    memset(img.data,0xff,img_size);
-    out_buf.push_back(img);
     frames++;
-    char tmp[100];
-    sprintf(tmp, "pic/%d.jpg",frames);
-    if (out_buf.size()>out_buf_limits){
+//    cout << "Copy Success" << endl;
+//    Mat  img(Size(WIDTH,HEIGHT), CV_8UC1);
+    //  memset(img.data,0xff,img_size);
+
+    //out_buf.push_back(img);
+    // char tmp[100];
+    //sprintf(tmp, "pic/%d.jpg",frames);
+    //  if (out_buf.size()>out_buf_limits){
 //        imwrite(tmp,  out_buf.front());
-        writer.write(out_buf.front());
-        out_buf.pop_front();
+    //    writer.write(out_buf.front());
+    //  out_buf.pop_front();
         
-    }
+    //  }
 //    imwrite(tmp, img);
         
 }
 imgproc::imgproc()
 {
     in_buf = new uchar[in_buffer_size];
+    Mat img(Size(WIDTH,HEIGHT), CV_8UC1);
+    goodimg = img;
+    memset(goodimg.data, 0x00, WIDTH*HEIGHT);
+
 }
 
 imgproc::~imgproc()
@@ -416,20 +354,30 @@ imgproc::~imgproc()
 }
 void imgproc::openvideo(string videoname)
 {
-
-
     int codec = VideoWriter::fourcc('M', 'J', 'P', 'G');
 
-    double fps = 50.0;                          // framerate of the created video stream
+    double fps = 50.0;
     string video_filename(videoname);
-    //string video_filename_bit = "./slow_show_bit.avi";     // name of the output video file
-
     writer.open(video_filename, codec, fps, Size(WIDTH,HEIGHT), 0);
 
     if (!writer.isOpened()) {
         cout << "Can't open the video files to write" << endl;
-
     }
+}
+void imgproc::savevideo()
+{
+    if (out_buf.size() > out_buf_limits/2) {
 
+        Mat img = goodimg.clone();
+        equalizeHist(img, img);
+        writer.write(img);
+    }
+}
+void imgproc::saveimg()
+{
+    char tmp[100];
 
+    sprintf(tmp, "pic/%d.jpg", frames );
+    if (out_buf.size() > out_buf_limits/2)
+        imwrite(tmp, goodimg);
 }

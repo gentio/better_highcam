@@ -29,14 +29,18 @@ public:
     void proc_raw();
     
     void openvideo(string filename);
+    void savevideo();
+    void saveimg();
 
     deque<Mat> out_buf;
+    Mat goodimg;
+
     uchar *in_buf;
 
     VideoWriter writer;
 private:
     int in_buffer_size = HEIGHT * WIDTH / 8;
-    int out_buf_limits  = 7;
+    int out_buf_limits  = 50;
     int img_size  = HEIGHT*WIDTH;
     int frames = 0;
     uchar q1 = 1;
